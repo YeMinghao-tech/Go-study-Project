@@ -19,6 +19,7 @@ func NewCtrl(adaptor *adaptor.Adaptor) *Ctrl {
 	return &Ctrl{
 		adaptor: adaptor,
 		user:    admin.NewService(adaptor),
+		hello:   admin.NewService(adaptor),
 	}
 }
 
