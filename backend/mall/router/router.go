@@ -80,7 +80,7 @@ func (r *Router) route(root *gin.RouterGroup) {
 
 	//root.GET("/hello", r.admin.HelloWorld)
 	// 管理员模块路由分组：/api/mall/admin
-	adminRoot := root.Group("/admin", AdminAuthMiddleware(r.SpanFilter))
+	adminRoot := root.Group("/admin")
 	// 具体接口：/api/mall/admin/user/info（GET方法）
 	adminRoot.GET("/user/info", r.admin.GetUserInfo)
 	// 可扩展：添加更多admin接口，比如 adminRoot.POST("/user/add", r.admin.AddUser)
