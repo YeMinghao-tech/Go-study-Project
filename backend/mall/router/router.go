@@ -1,9 +1,11 @@
 package router
 
 import (
+	"context"
 	"mall/adaptor"
 	"mall/api/admin"
 	"mall/api/customer"
+	"mall/common"
 	"mall/config"
 	"net/http"
 
@@ -53,8 +55,7 @@ func (r *Router) checkServer() func(*gin.Context) {
 }
 
 func (r *Router) Register(app *gin.Engine) {
-	// 1. 全局中间件：注册认证中间件（传入SpanFilter控制链路追踪）
-	app.Use(AuthMiddleware(r.SpanFilter))
+
 	// 2. 开启PPROF性能分析（从配置控制）
 	if r.conf.Server.EnablePprof {
 		SetupPprof(app, "/debug/pprof")
@@ -78,10 +79,35 @@ func (r *Router) AccessRecordFilter(ctx *gin.Context) bool {
 
 func (r *Router) route(root *gin.RouterGroup) {
 
-	//root.GET("/hello", r.admin.HelloWorld)
-	// 管理员模块路由分组：/api/mall/admin
-	adminRoot := root.Group("/admin")
-	// 具体接口：/api/mall/admin/user/info（GET方法）
-	adminRoot.GET("/user/info", r.admin.GetUserInfo)
-	// 可扩展：添加更多admin接口，比如 adminRoot.POST("/user/add", r.admin.AddUser)
+	////root.GET("/hello", r.admin.HelloWorld)
+	//// 管理员模块路由分组：/api/mall/admin
+	//adminRoot := root.Group("/admin")
+	//// 具体接口：/api/mall/admin/user/info（GET方法）
+	//adminRoot.GET("/user/info", r.admin.GetUserInfo)
+	//// 可扩展：添加更多admin接口，比如 adminRoot.POST("/user/add", r.admin.AddUser)
+	r.customerRoute(root)
+	r.adminRoute(root)
+}
+
+func (r *Router) customerRoute(root *gin.RouterGroup) {
+	cstRoot := root.Group("/customer", AuthMiddleware(r.SpanFilter, func(ctx context.Context, token string) (*common.User, error) {
+		return &common.User{}, nil
+	}))
+	cstRoot.Any("/user/info", r.admin.GetUserInfo)
+}
+
+func (r *Router) adminRoute(root *gin.RouterGroup) {
+	adminRoot := root.Group("/admin", AdminAuthMiddleware(r.SpanFilter, func(ctx context.Context, token string) (*common.AdminUser, error) {
+		return &common.AdminUser{
+			UserID: 1,
+			Name:   "admin",
+		}, nil
+	}))
+	// 登录无鉴权：添加白名单
+	//adminRoot.GET("/v1/user/verify/captcha", r.admin.GetSmsCodeCaptcha)
+	//adminRoot.POST("/v1/user/verify/captcha/check", r.admin.CheckSmsCodeCaptcha)
+
+	adminRoot.GET("/v1/user/info", r.admin.GetUserInfo)
+	//adminRoot.POST("/v1/user/create", r.admin.CreateUser)
+	//adminRoot.POST("/v1/user/update", r.admin.UpdateUser)
 }
