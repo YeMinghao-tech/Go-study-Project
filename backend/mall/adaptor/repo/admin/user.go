@@ -21,10 +21,10 @@ type AdminUser struct {
 	redis *redis.Client
 }
 
-func NewAdminUser(adaptor *adaptor.Adaptor) *AdminUser {
+func NewAdminUser(adaptor adaptor.IAdaptor) *AdminUser {
 	return &AdminUser{
-		db:    adaptor.DbClient,
-		redis: adaptor.Redis,
+		db:    adaptor.GetDB(),
+		redis: adaptor.GetRedis(),
 	}
 }
 

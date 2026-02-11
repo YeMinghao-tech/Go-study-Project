@@ -27,7 +27,7 @@ type Router struct {
 	customer  *customer.Ctrl // 客户模块控制器
 }
 
-func NewRouter(conf *config.Config, adaptor *adaptor.Adaptor, checkFunc func() error) *Router {
+func NewRouter(conf *config.Config, adaptor adaptor.IAdaptor, checkFunc func() error) *Router {
 	return &Router{
 		FullPPROF: conf.Server.EnablePprof,   // 从配置读取是否开启PPROF
 		rootPath:  "/api/mall",               // 全局路由根路径
@@ -80,7 +80,7 @@ func (r *Router) route(root *gin.RouterGroup) {
 
 	//root.GET("/hello", r.admin.HelloWorld)
 	// 管理员模块路由分组：/api/mall/admin
-	adminRoot := root.Group("/admin")
+	adminRoot := root.Group("/admin", AdminAuthMiddleware(r.SpanFilter))
 	// 具体接口：/api/mall/admin/user/info（GET方法）
 	adminRoot.GET("/user/info", r.admin.GetUserInfo)
 	// 可扩展：添加更多admin接口，比如 adminRoot.POST("/user/add", r.admin.AddUser)
