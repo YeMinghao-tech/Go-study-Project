@@ -108,6 +108,6 @@ func (r *Router) adminRoute(root *gin.RouterGroup) {
 	//adminRoot.POST("/v1/user/verify/captcha/check", r.admin.CheckSmsCodeCaptcha)
 
 	adminRoot.GET("/v1/user/info", r.admin.GetUserInfo)
-	//adminRoot.POST("/v1/user/create", r.admin.CreateUser)
-	//adminRoot.POST("/v1/user/update", r.admin.UpdateUser)
+	adminRoot.POST("/v1/user/create", r.admin.CreateUser)
+	adminRoot.POST("/v1/user/update", r.admin.UpdateUser)
 }
