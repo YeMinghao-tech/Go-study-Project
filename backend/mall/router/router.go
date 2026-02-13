@@ -8,6 +8,7 @@ import (
 	"mall/common"
 	"mall/config"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -70,6 +71,11 @@ func (r *Router) Register(app *gin.Engine) {
 }
 
 func (r *Router) SpanFilter(ctx *gin.Context) bool {
+	path := strings.Replace(ctx.Request.URL.Path, r.rootPath, "", 1)
+	_, ok := AdminAuthWhiteList[path]
+	if ok {
+		return false
+	}
 	return true
 }
 
@@ -104,8 +110,8 @@ func (r *Router) adminRoute(root *gin.RouterGroup) {
 		}, nil
 	}))
 	// 登录无鉴权：添加白名单
-	//adminRoot.GET("/v1/user/verify/captcha", r.admin.GetSmsCodeCaptcha)
-	//adminRoot.POST("/v1/user/verify/captcha/check", r.admin.CheckSmsCodeCaptcha)
+	adminRoot.GET("/v1/user/verify/captcha", r.admin.GetSmsCodeCaptcha)
+	adminRoot.POST("/v1/user/verify/captcha/check", r.admin.CheckSmsCodeCaptcha)
 
 	adminRoot.GET("/v1/user/info", r.admin.GetUserInfo)
 	adminRoot.POST("/v1/user/create", r.admin.CreateUser)
